@@ -1,0 +1,36 @@
+.taskList {
+    padding-bottom: 30px;
+}
+
+.info {
+    display: flex;
+    align-items: center;
+    column-gap: 20px;
+    margin-bottom: 20px;
+}
+
+.infoText {
+    margin: 0;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: 500;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.all {
+    background-color: var(--blue);
+    color: var(--blue-alt);
+}
+
+.completed {
+    background-color: var(--green);
+    color: var(--green-alt);
+}
+
+.list {
+    margin-top: 0;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+}

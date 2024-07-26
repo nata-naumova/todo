@@ -1,0 +1,40 @@
+.taskForm {
+  padding: 40px 0;
+}
+
+.form {
+  display: flex;
+  align-items: center;
+  column-gap: 20px;
+}
+
+.input {
+  background-color: transparent;
+  outline: none;
+  border: 2px solid var(--secondary);
+  padding: 10px 20px;
+  width: 100%;
+  color: var(--text);
+  font-size: 18px;
+  border-radius: 5px;
+
+  transition: 0.3s border-color ease-in-out;
+}
+
+.input:focus-visible {
+  border-color: var(--accent);
+}
+
+.button {
+  background-color: var(--accent);
+  color: var(--text);
+  padding: 13px;
+  border: 2px solid var(--accent);
+  font-weight: 600;
+  transition: 0.3s background-color ease-in-out;
+  border-radius: 5px;
+}
+
+.button:hover {
+  background-color: transparent;
+}
