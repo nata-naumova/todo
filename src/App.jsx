@@ -4,13 +4,26 @@ import Header from "./components/Header/Header";
 import TaskForm from "./components/TaskForm/TaskForm";
 import TaskList from "./components/TaskList/TaskList";
 import Footer from "./components/Footer/Footer";
+import ConfirmationModal from "./components/Modals/ConfirmationModal";
+import { formattedDate } from "./utils/constants";
+import EditingModal from "./components/Modals/EditingModal";
 
 function App() {
   const [tasks, setTasks] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [data, setData] = useState(null);
 
-  const date = new Date();
-  const options = { year: "numeric", month: "long", day: "numeric" };
-  const formattedDate = new Intl.DateTimeFormat("ru-RU", options).format(date);
+  const favoriteTasks = tasks.filter(
+    (task) => task.isFavorite && !task.isCompleted
+  );
+  const completedTasks = tasks.filter((task) => task.isCompleted);
+  const remainingTasks = tasks.filter(
+    (task) => !task.isFavorite && !task.isCompleted
+  );
+
+  // modals
+  const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
+  const [editModalIsOpen, setEditModalIsOpen] = useState(false);
 
   function loadSavedTasks() {
     const saved = localStorage.getItem("todo:savedTasks");
@@ -24,41 +37,50 @@ function App() {
   }, []);
 
   function setTaskAndSave(newTask) {
-    sortTaskList(newTask);
+    // sortTaskList(newTask);
     setTasks(newTask);
     localStorage.setItem("todo:savedTasks", JSON.stringify(newTask));
   }
 
   function addTask(title) {
     setTaskAndSave([
-      ...tasks,
       {
         id: crypto.randomUUID(),
         title: title,
         isCompleted: false,
+        isFavorite: false,
         date: formattedDate,
       },
+      ...tasks,
     ]);
   }
 
-  function editTask(title, taskId) {
-    const updateTasks = tasks.map((task) => {
-      if (task.id === taskId) {
+  function editTask(task) {
+    const updateTasks = tasks.map((element) => {
+      if (element.id === task.id) {
         return {
-          ...task,
-          title: title,
+          ...element,
+          title: task.title,
+          description: task.description,
           update: formattedDate,
+          status: task.status,
+          tags: task.tags,
         };
       }
-      return task;
+      return element;
     });
+    console.log("task: ", task);
     setTaskAndSave(updateTasks);
-    console.log("updateTasks: ", updateTasks);
+    closeEditModal();
   }
 
-  function deleteTaskById(taskId) {
-    const newTasks = tasks.filter((task) => task.id !== taskId);
-    setTaskAndSave(newTasks);
+  function deleteTaskById() {
+    if (selectedId) {
+      const newTasks = tasks.filter((task) => task.id !== selectedId);
+      setTaskAndSave(newTasks);
+    }
+    setSelectedId(null);
+    closeDeleteModal();
   }
 
   function sortTaskList(newTask) {
@@ -80,19 +102,85 @@ function App() {
     setTaskAndSave(newTasks);
   }
 
+  function toggleTaskFavouriteById(taskId) {
+    const newTasks = tasks.map((task) => {
+      if (task.id === taskId) {
+        return {
+          ...task,
+          isFavorite: !task.isFavorite,
+        };
+      }
+      return task;
+    });
+
+    setTaskAndSave(newTasks);
+  }
+
+  const openDeleteModal = (task) => {
+    setDeleteModalIsOpen(true);
+    setSelectedId(task.id);
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModalIsOpen(false);
+  };
+
+  const openEditModal = (task) => {
+    setEditModalIsOpen(true);
+    setData(task);
+  };
+
+  const closeEditModal = () => {
+    setEditModalIsOpen(false);
+    setData(null);
+  };
+
   return (
     <>
       <Header />
+      <TaskForm onAddTask={addTask} />
       <main className="container">
-        <TaskForm onAddTask={addTask} />
         <TaskList
-          tasks={tasks}
+          tasks={favoriteTasks}
+          title={"Избранное"}
           onComplete={toggleTaskCompletedById}
-          onDelete={deleteTaskById}
-          onEdit={editTask}
+          openDeleteModal={openDeleteModal}
+          openEditModal={openEditModal}
+          onFavorite={toggleTaskFavouriteById}
+        />
+        <TaskList
+          tasks={remainingTasks}
+          title={"В работе"}
+          onComplete={toggleTaskCompletedById}
+          openDeleteModal={openDeleteModal}
+          openEditModal={openEditModal}
+          onFavorite={toggleTaskFavouriteById}
+        />
+        <TaskList
+          tasks={completedTasks}
+          title={"Выполненные"}
+          onComplete={toggleTaskCompletedById}
+          openDeleteModal={openDeleteModal}
+          openEditModal={openEditModal}
+          onFavorite={toggleTaskFavouriteById}
         />
       </main>
       <Footer />
+
+      <ConfirmationModal
+        deleteModalIsOpen={deleteModalIsOpen}
+        closeDeleteModal={closeDeleteModal}
+        onDelete={deleteTaskById}
+      />
+
+      {data && (
+        <EditingModal
+          data={data}
+          editModalIsOpen={editModalIsOpen}
+          closeEditModal={closeEditModal}
+          editTask={editTask}
+        />
+      )}
     </>
   );
 }

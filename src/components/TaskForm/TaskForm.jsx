@@ -4,14 +4,12 @@ import styles from "./taskForm.module.css";
 const TaskForm = ({ onAddTask }) => {
   const [title, setTitle] = useState("");
 
-  function onChangeTitle(event) {
-    setTitle(event.target.value);
-  }
-
   function handleSubmit(event) {
     event.preventDefault();
-    onAddTask(title);
-    setTitle("");
+    if (title.trim() !== "") {
+      onAddTask(title);
+      setTitle("");
+    }
   }
   return (
     <section className={styles.taskForm}>
@@ -19,16 +17,13 @@ const TaskForm = ({ onAddTask }) => {
         <input
           type="text"
           name="taskName"
-          className={styles.input}
-          placeholder="Введите текст"
+          className={`${styles.input} glassmorphism`}
+          placeholder="What do you need to do?"
           value={title}
-          onChange={onChangeTitle}
+          onChange={(event) => setTitle(event.target.value)}
         />
-        <button
-          className={styles.button}
-          title="Добавить новую задачу"
-        >
-          Добавить
+        <button className={styles.button} title="Добавить новую задачу">
+          + Add
         </button>
       </form>
     </section>
